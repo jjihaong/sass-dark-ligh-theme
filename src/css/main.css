@@ -1,0 +1,18 @@
+[data-theme=light] h2 {
+  color: #000;
+}
+[data-theme=dark] h2 {
+  color: #fff;
+}
+
+.item {
+  width: 300px;
+}
+[data-theme=light] .item {
+  background-color: #fff;
+  color: #000;
+}
+[data-theme=dark] .item {
+  background-color: #000;
+  color: #fff;
+}/*# sourceMappingURL=main.css.map */

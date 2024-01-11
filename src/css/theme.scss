@@ -1,0 +1,77 @@
+$bgColor: #f5f5f5;
+
+// 定义一个所有主题的对象，在mixin里面循环每一个主题
+// scss中定义变量都是用符号$开头，对象用（），不同于js的{}
+$themes: (
+    light: (
+        // 这里包含当前主题下所有样式
+        bgColor: #f5f5f5,
+        titleBgcolor: #ffbb00,
+        txtColor: #000,
+        borderColor: #eee,
+        borderRadius: 4px
+        // 这里可以继续添加
+    ),
+    dark: (
+        bgColor: #000,
+        titleBgcolor: #416cce,
+        txtColor: #fff,
+        borderColor: #fff
+    ),
+    gray: ()
+);
+
+// 定义一个全局变量，保存主题
+$currentTheme: 'light';
+
+@mixin useTheme {
+    // 这里循环上面的主题对象
+    // scss循环用@each，后面不用括号
+    // scss中模板字符串不是${}，而是#{}
+    @each $key, $value in $themes {
+        // 这里是再次定义变量$currentTheme
+        // 这里!global意思是把这个变量设置成全局，覆盖了外面定义的$currentTheme，这样在getVal函数中才能获取到当前循环的主题是light还是dark
+        $currentTheme: $key !global;
+        html[data-theme='#{$key}'] & {
+            // 这里以下写法会有问题，不管是哪个元素引用了这个mixin，都会设置背景色和字体色
+            // background-color: #f5f5f5;
+            // color: #000;
+            // 所以这里应该给个插槽，具体要什么样式交给引用的元素来填写
+            // scss @content相当于vue中的<slot></slot>
+            @content;
+        }
+    }
+}
+
+@function getVal($param) {
+    // 注意scss函数中参数必须加上$符号,return的时候必须用@return
+    // scss中获取某个对象的值，map-get(要读取的对象，要读取的对象的key)
+    $value: map-get($themes, $currentTheme);
+    @return map-get($value, $param);
+};
+
+.item {
+    width: 300px;
+    line-height: 24px;
+    margin: 24px auto;
+    padding: 24px;
+    @include useTheme {
+        // 这里属性名是当前元素所需的样式名，它们作为插槽值的形式写入每个主题当中
+        // 属性值不能写死，写死的话，每个主题中就是完全相同的样式了
+        // 所以这里要根据不同主题来设置不同的值
+        // 具体思路就是想办法获取$themes对象中某个主题对象下面的某个元素名
+        // 创建一个方法，这个方法用于根据参数获取对应的值
+        // scss中使用@function定义一个方法
+        background-color: getVal('bgColor');
+        color: getVal('txtColor');
+    }
+}
+
+h2 {
+    margin: 0 auto 24px;
+    @include useTheme{
+        color: getVal('txtColor');
+        border-bottom:  1px solid getVal('borderColor');
+        background-color: getVal('titleBgcolor');
+    }
+}
